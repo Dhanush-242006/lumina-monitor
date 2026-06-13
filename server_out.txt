@@ -1,0 +1,2 @@
+Lumina Monitor running on http://localhost:8080
+Public status page: http://localhost:8080/status

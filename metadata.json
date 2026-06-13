@@ -1,0 +1,6 @@
+{
+  "name": "Lumina Status",
+  "description": "An AI-driven system status analysis tool that monitors projects via link or ZIP upload, generating real-time component health reports and uptime metrics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
