@@ -200,6 +200,9 @@ export interface AppSettings {
   supabaseAccessToken?: string;   // Personal access token from supabase.com/dashboard/account/tokens
   supabaseProjectRef?: string;    // e.g. abcdefghijklmn
   supabaseAnonKey?: string;       // Used as Bearer token when calling edge functions
+  // ── Branding ───────────────────────────────────────────────────────────
+  tileImage?: string;             // Base64 data URL, 256×256 PNG
+  favicon?: string;               // Base64 data URL, 32×32 PNG/ICO
 }
 
 export interface MaintenanceWindow {

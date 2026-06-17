@@ -140,6 +140,9 @@ interface AppSettings {
   supabaseAccessToken?: string;
   supabaseProjectRef?: string;
   supabaseAnonKey?: string;
+  // ── Branding ───────────────────────────────────────────────────────────
+  tileImage?: string;
+  favicon?: string;
 }
 
 interface HealthRecord {
@@ -2300,6 +2303,22 @@ async function startServer() {
     if (body.supabaseAnonKey     === "••••••••") delete body.supabaseAnonKey;
     writeJson(FILES.settings, { ...cur, ...body });
     res.json({ ok: true });
+  });
+
+  // Serve custom favicon if one is stored in settings
+  app.get("/favicon.ico", (_req, res) => {
+    const s = readSettings();
+    if (s.favicon && s.favicon.startsWith("data:")) {
+      const [header, b64] = s.favicon.split(",");
+      const mimeMatch = header.match(/data:([^;]+)/);
+      const mime = mimeMatch ? mimeMatch[1] : "image/x-icon";
+      const buf = Buffer.from(b64, "base64");
+      res.setHeader("Content-Type", mime);
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.end(buf);
+    } else {
+      res.status(404).end();
+    }
   });
 
   // Expose Gemini API key (unmasked) only for frontend AI usage

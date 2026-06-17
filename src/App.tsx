@@ -2849,6 +2849,16 @@ const SettingsView = () => {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+    // Apply favicon immediately in the current tab
+    if (settings.favicon) {
+      let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      link.href = settings.favicon;
+    }
   };
 
   const handleTestGeminiKey = async () => {
@@ -2920,6 +2930,100 @@ const SettingsView = () => {
       <div>
         <h2 className="text-2xl font-black uppercase tracking-tight">Settings</h2>
         <p className="text-sm text-text-dim mt-1">Configure email notifications and global preferences</p>
+      </div>
+
+      {/* Branding */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-8 space-y-6">
+        <div>
+          <h3 className="font-bold text-sm">Branding</h3>
+          <p className="text-xs text-text-dim mt-0.5">Customize your launcher tile image and browser favicon</p>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          {/* Tile Image */}
+          <div className="flex flex-col gap-3">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-text-dim">Tile Image</label>
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                {settings.tileImage ? (
+                  <img src={settings.tileImage} alt="Tile" className="w-full h-full object-cover rounded-xl" />
+                ) : (
+                  <span className="text-[10px] text-gray-400 font-bold">None</span>
+                )}
+              </div>
+              <div className="flex-1 space-y-1.5">
+                <p className="text-[11px] text-text-dim leading-relaxed">Shown on the NCPL One launcher. Recommended 256×256 PNG.</p>
+                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-bold cursor-pointer transition-colors">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        setSettings((s) => ({ ...s, tileImage: ev.target?.result as string }));
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  Upload
+                </label>
+                {settings.tileImage && (
+                  <button
+                    onClick={() => setSettings((s) => ({ ...s, tileImage: undefined }))}
+                    className="block text-[10px] text-rose-400 hover:text-rose-600 font-bold"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Favicon */}
+          <div className="flex flex-col gap-3">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-text-dim">Favicon</label>
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                {settings.favicon ? (
+                  <img src={settings.favicon} alt="Favicon" className="w-8 h-8 object-contain" />
+                ) : (
+                  <span className="text-[10px] text-gray-400 font-bold">None</span>
+                )}
+              </div>
+              <div className="flex-1 space-y-1.5">
+                <p className="text-[11px] text-text-dim leading-relaxed">Optional — apps may fetch this at boot. 32×32 PNG / ICO.</p>
+                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-bold cursor-pointer transition-colors">
+                  <input
+                    type="file"
+                    accept="image/png,image/x-icon,image/ico,image/vnd.microsoft.icon"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        setSettings((s) => ({ ...s, favicon: ev.target?.result as string }));
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  Upload
+                </label>
+                {settings.favicon && (
+                  <button
+                    onClick={() => setSettings((s) => ({ ...s, favicon: undefined }))}
+                    className="block text-[10px] text-rose-400 hover:text-rose-600 font-bold"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="text-[10px] text-text-dim">Click <strong>Save Settings</strong> below to apply changes.</p>
       </div>
 
       {/* Public Status Page */}
@@ -7862,6 +7966,19 @@ export default function App() {
     axios.get<ConsoleLog[]>("/api/logs?limit=300")
       .then((r) => setConsoleLogs(r.data.reverse())) // oldest first
       .catch(() => {});
+
+    // Apply custom favicon from settings if one is stored
+    axios.get<AppSettings>("/api/settings").then((r) => {
+      if (r.data.favicon) {
+        let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+        if (!link) {
+          link = document.createElement("link");
+          link.rel = "icon";
+          document.head.appendChild(link);
+        }
+        link.href = r.data.favicon;
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
