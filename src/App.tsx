@@ -6886,6 +6886,62 @@ const APMView = () => {
           </span>
         ))}
       </div>
+
+      {/* Percentile Reference */}
+      <div className="mt-6 bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+        <div className="border-b border-gray-100 px-4 py-3 flex items-center gap-2">
+          <Info size={14} className="text-brand" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-text-dim">Percentile Reference — What P50 / P75 / P95 / P99 Mean</span>
+        </div>
+        <div className="grid grid-cols-4 divide-x divide-gray-100">
+          {[
+            {
+              label: "P50",
+              badge: "bg-brand/10 text-brand",
+              title: "Median response",
+              desc: "Half of all requests completed faster than this. Represents the typical user experience under normal load.",
+              example: "If P50 = 120ms, most users see sub-120ms responses.",
+            },
+            {
+              label: "P75",
+              badge: "bg-blue-50 text-blue-600",
+              title: "75th percentile",
+              desc: "3 out of 4 requests finished faster than this. A good signal for slightly slower users or heavier payloads.",
+              example: "If P75 = 300ms, 75% of users get responses under 300ms.",
+            },
+            {
+              label: "P95",
+              badge: "bg-amber-50 text-amber-600",
+              title: "95th percentile",
+              desc: "95% of requests finished faster than this. Widely used as the SLA target — reveals edge-case slowdowns.",
+              example: "If P95 = 800ms, 1 in 20 requests is slower than 800ms.",
+            },
+            {
+              label: "P99",
+              badge: "bg-rose-50 text-rose-600",
+              title: "Worst-case (tail)",
+              desc: "99% of requests finished faster than this. Catches rare but severe outliers — timeouts, cold starts, DB locks.",
+              example: "If P99 = 3000ms, 1 in 100 requests hits 3 seconds or more.",
+            },
+          ].map(({ label, badge, title, desc, example }) => (
+            <div key={label} className="p-5 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={cn("px-2.5 py-1 rounded-lg text-sm font-black", badge)}>{label}</span>
+                <span className="text-xs font-bold text-text-main">{title}</span>
+              </div>
+              <p className="text-[11px] text-text-dim leading-relaxed">{desc}</p>
+              <p className="text-[10px] text-text-dim bg-gray-50 rounded-lg px-2.5 py-1.5 leading-relaxed">{example}</p>
+            </div>
+          ))}
+        </div>
+        <div className="border-t border-gray-100 px-5 py-3 bg-gray-50/50 flex items-start gap-2">
+          <Info size={12} className="text-text-dim mt-0.5 shrink-0" />
+          <p className="text-[10px] text-text-dim leading-relaxed">
+            <strong className="text-text-main">Goal:</strong> Keep P95 under 1000ms and P99 under 3000ms for a good user experience.
+            A large gap between P50 and P99 means occasional slow requests — investigate with the Traces tab for waterfall breakdown.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
